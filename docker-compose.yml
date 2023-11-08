@@ -1,0 +1,25 @@
+services:
+  app:
+    container_name: app
+    # restart: on-failure
+    image: node
+    build:
+      context: ./src
+      dockerfile: Dockerfile
+    volumes:
+      - /usr/src/app/node_modules
+    ports:
+      - '8000:8000'
+  # nginx:
+  #   container_name: nginx
+  #   restart: on-failure
+  #   build: ./nginx
+  #   ports:
+  #     - '443'
+  #   depends_on:
+  #     - app
+  # mysql:
+  #   restart: on-failure
+  #   build: ./mysql
+  #   ports:
+  #     - '3306'
