@@ -1,9 +1,9 @@
-FROM node
+FROM node:20-alpine3.17
 
-WORKDIR /usr/src/app
+WORKDIR /usr/app
 
 COPY package*.json ./
 
 RUN npm install
 
-COPY ./ ./
+COPY ./src/ ./src/

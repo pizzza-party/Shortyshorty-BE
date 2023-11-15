@@ -2,14 +2,13 @@ services:
   app:
     container_name: app
     # restart: on-failure
-    image: node
     build:
-      context: ./src
-      dockerfile: Dockerfile
+      context: ./
+      dockerfile: ./src/ Dockerfile
     volumes:
       - /usr/src/app/node_modules
     ports:
-      - '8000:8000'
+      - '8000'
   # nginx:
   #   container_name: nginx
   #   restart: on-failure
