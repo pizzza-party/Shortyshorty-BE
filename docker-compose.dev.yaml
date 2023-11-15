@@ -12,3 +12,15 @@ services:
     env_file:
       - .env.dev
     command: ['npm', 'run', 'dev']
+  nginx:
+    container_name: nginx
+    restart: on-failure
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+    ports:
+      - '80'
+    depends_on:
+      - app
+    volumes:
+      - ./nginx/nginx.conf:/etc/nginx/nginx.conf
