@@ -19,8 +19,3 @@ services:
       - '80'
     depends_on:
       - app
-  # mysql:
-  #   restart: on-failure
-  #   build: ./mysql
-  #   ports:
-  #     - '3306'
