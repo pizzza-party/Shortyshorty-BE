@@ -1,18 +1,18 @@
 # Shortyshorty-BE
 
-> URL Shortener
+> Base62를 기반으로 하는 URL Shortener
 
-![Shortyshorty Home]()
+<!-- ![Shortyshorty Home]() -->
 
-![After convert]()
+<!-- ![After convert]() -->
 
-## Architecture
+<!-- ## Architecture -->
 
-![Shortyshorty Architecture]()
+<!-- ![Shortyshorty Architecture]() -->
 
 ## ERD
 
-![Shortyshorty ERD]()
+![Shortyshorty ERD](https://github.com/pizzza-party/Shortyshorty-BE/assets/67633810/0113b6e6-d24d-450a-8192-51d517b68c12)
 
 ## Stacks
 
@@ -22,9 +22,9 @@
 ![Sequelize](https://img.shields.io/badge/Sequelize-52B0E7?style=flat&logo=Sequelize&logoColor=white)
 ![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=flat&logo=swagger&logoColor=white)
 
-![Nginx](https://img.shields.io/badge/Nginx-009639?style=flat&logo=Nginx&logoColor=white)
 ![Docker](https://img.shields.io/badge/24.0.7-Docker-2496ED?style=flat&logo=Docker&logoColor=white)
 ![Docker Compose](https://img.shields.io/badge/2.21.0-Docker_Compose-2496ED?style=flat&logo=dockercompose&logoColor=white)
+![Nginx](https://img.shields.io/badge/Nginx-009639?style=flat&logo=Nginx&logoColor=white)
 ![AWS Lightsail](https://img.shields.io/badge/AWS_Lightsail-FF9900?style=flat&logo=awslightsail&logoColor=white)
 
 ## Set Up
@@ -32,7 +32,16 @@
 ### Installation
 
 ```bash
-
+$ git clone https://github.com/pizzza-party/Shortyshorty-BE.git
 ```
 
 ### Quick Start
+
+```bash
+# 시작
+make
+
+# 종료
+make down
+
+```
