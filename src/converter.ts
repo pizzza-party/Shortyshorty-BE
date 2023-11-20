@@ -9,6 +9,10 @@ const indexToBase62 = function (index: number) {
     index = Math.floor(index / 62);
   }
 
+  if (shortUrl.length < 6) {
+    shortUrl = '='.repeat(6 - shortUrl.length) + shortUrl;
+  }
+
   return shortUrl;
 };
 
@@ -17,6 +21,9 @@ const base62ToIndex = function (shortUrl: string) {
   let shortUrlIndex = shortUrl.length - 1;
 
   for (let exponent = 0; exponent < shortUrl.length; exponent++) {
+    if (shortUrl[shortUrlIndex] === '=') {
+      break;
+    }
     index +=
       Math.pow(62, exponent) * base62Char.indexOf(shortUrl[shortUrlIndex--]);
   }
