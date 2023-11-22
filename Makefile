@@ -13,5 +13,8 @@ up:
 down:
 	$(DC) -f $(DCFILE) down --rmi all
 
+ps:
+	$(DC) ps
+
 log-app:
 	$(DC) logs app --follow
