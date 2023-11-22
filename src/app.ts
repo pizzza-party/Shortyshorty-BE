@@ -1,4 +1,4 @@
-import express from 'express';
+import express, { Request, Response, NextFunction } from 'express';
 import dotenv from 'dotenv/config';
 import { StatusCodes } from 'http-status-codes';
 import swaggerUi from 'swagger-ui-express';
@@ -7,11 +7,17 @@ import YAML from 'yaml';
 import cors from 'cors';
 import Url from './db';
 import { indexToBase62, base62ToIndex } from './converter';
+import customError from './customError';
 
 const app = express();
 const port = process.env.PORT;
 
-app.use(cors());
+app.use(
+  cors({
+    origin: true,
+    credentials: true,
+  })
+);
 app.use(express.json());
 
 // Swagger
@@ -19,53 +25,64 @@ const file = fs.readFileSync('./src/swagger.yaml', 'utf8');
 const swaggerDocument = YAML.parse(file);
 app.use('/api-docs', swaggerUi.serve, swaggerUi.setup(swaggerDocument));
 
-app.post('/api', async (req, res) => {
+app.post('/api', async (req, res, next) => {
   try {
     const { url } = req.body;
 
-    const { dataValues } = await Url.create({
-      originUrl: 'https://www.naver.com',
+    const isExist = await Url.findOne({
+      where: {
+        originUrl: url,
+      },
     });
-    console.log(dataValues);
 
-    const shortUrlToBase62 = indexToBase62(dataValues.id);
+    let id;
+    if (!isExist) {
+      const newUrl = await Url.create({
+        originUrl: url,
+      });
+
+      id = newUrl.dataValues.id;
+    } else {
+      id = isExist.dataValues.id;
+    }
+
+    const shortUrlToBase62 = indexToBase62(id);
 
     return res.status(StatusCodes.OK).json({
       message: '🔁 Convert Success!',
       data: shortUrlToBase62,
     });
   } catch (error) {
-    console.error(error);
+    next(error);
   }
 });
 
-app.get('/api/:shortUrl', async (req, res) => {
+app.get('/:shortUrl', async (req, res, next) => {
   try {
     const { shortUrl } = req.params;
-
-    // insert DB
     const id = base62ToIndex(shortUrl);
-
-    const [{ dataValues }, ...rest] = await Url.findAll({
+    const url = await Url.findOne({
       where: {
         id,
       },
     });
-    console.log(dataValues);
-
-    // res.header();
-    // res.;
-
-    return res.redirect(dataValues.originUrl);
-
-    /* return res.status(StatusCodes.OK).json({
-      message: '🔁 Redirection Success!',
-      data: dataValues.originUrl,
-    }); */
+    if (!url) throw new customError(StatusCodes.BAD_REQUEST, 'DB가 없음');
+    const { originUrl } = url.dataValues;
+    return res
+      .status(StatusCodes.MOVED_PERMANENTLY)
+      .header('Access-Control-Allow-Origin: *')
+      .redirect(originUrl);
   } catch (error) {
-    console.error(error);
+    next(error);
   }
 });
+
+app.use(
+  (error: customError, req: Request, res: Response, next: NextFunction) => {
+    console.log(error);
+    return res.status(error.statusCode).json({ message: error.message });
+  }
+);
 
 app.listen(port, () => {
   console.log(`Hello, ${port}`);
