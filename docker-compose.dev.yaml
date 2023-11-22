@@ -1,4 +1,31 @@
+version: '3.8'
+
 services:
+  mysql:
+    container_name: mysql
+    build:
+      context: mysql
+      dockerfile: Dockerfile
+    ports:
+      - '3306:3306'
+    env_file:
+      - .env.dev
+    healthcheck:
+      test:
+        [
+          'CMD',
+          'mysqladmin',
+          'ping',
+          '-h',
+          'localhost',
+          '-u',
+          'root',
+          '-p$$MYSQL_ROOT_PASSWORD',
+        ]
+      timeout: 20s
+      retries: 10
+    networks:
+      - network
   app:
     container_name: app
     build:
@@ -11,7 +38,12 @@ services:
       - /usr/app/node_modules
     env_file:
       - .env.dev
-    command: ['npm', 'run', 'dev']
+    command: npm run dev
+    depends_on:
+      mysql:
+        condition: service_healthy
+    networks:
+      - network
   # nginx:
   #   container_name: nginx
   #   restart: on-failure
@@ -24,13 +56,7 @@ services:
   #     - app
   #   volumes:
   #     - ./nginx/nginx.conf:/etc/nginx/nginx.conf
-  # mysql:
-  #   # restart: on-failure
-  #   container_name: mysql
-  #   build:
-  #     context: mysql
-  #     dockerfile: Dockerfile
-  #   ports:
-  #     - '3306:3306'
-  #   env_file:
-  #     - .env.dev
+
+networks:
+  network:
+    driver: bridge

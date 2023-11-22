@@ -15,6 +15,16 @@ paths:
         - API
       summary: Make short URL
       description: Make short URL based on Base62
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+
       responses:
         '200':
           description: Convert success
