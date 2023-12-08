@@ -1,18 +1,18 @@
-.PHONY: all build deploy clean re local
+.PHONY: all build deploy clean fclean re
 
 all: build deploy
 
 build:
-	tsc
+	npm run build
 
 deploy:
-	serverless deploy
-
-# 로컬에서 람다 확인
-local: 
-	serverless invoke local --function sample
+	npm run deploy
 
 clean:
 	rm -rf dist/
+
+fclean:
+	clean
+	sls remove
 
 re: clean all
