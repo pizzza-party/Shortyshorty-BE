@@ -6,14 +6,16 @@
   "scripts": {
     "build": "tsc & sls package",
     "deploy": "sls deploy",
-    "local": "sls invoke local --function sample"
+    "local": "sls invoke local --function shortUrlConverter"
   },
   "author": "",
   "license": "ISC",
   "devDependencies": {
-    "@types/aws-lambda": "^8.10.130"
+    "@types/aws-lambda": "^8.10.130",
+    "@types/pg": "^8.10.9"
   },
   "dependencies": {
-    "http-status-codes": "^2.3.0"
+    "http-status-codes": "^2.3.0",
+    "pg": "^8.11.3"
   }
 }

@@ -1,31 +1,62 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
+import { APIGatewayProxyResult } from 'aws-lambda';
 import { StatusCodes } from 'http-status-codes';
 import { indexToBase62, base62ToIndex } from './converter';
+import { QueryEvent, ParamEvent, Response, Error } from './@types/event';
+import { Pool } from 'pg';
 
-const shortUrlConverter = async (
-  event: APIGatewayProxyEvent
-): Promise<APIGatewayProxyResult> => {
+// Database
+const connectDatabase = async function () {
   try {
-    /* const { url } = req.query;
-
-    const isExist = await Url.findOne({
-      where: {
-        originUrl: url,
-      },
+    const db = new Pool({
+      host: process.env.DB_HOST,
+      user: process.env.DB_USER,
+      password: process.env.DB_PASSWORD,
+      database: process.env.DB_NAME,
+      port: Number(process.env.DB_PORT),
     });
 
+    await db.connect();
+    return db;
+  } catch (error) {
+    console.error(error);
+  }
+};
+
+// APIs
+const shortUrlConverter = async (
+  event: QueryEvent
+): Promise<APIGatewayProxyResult | Error> => {
+  try {
+    const { url } = event.queryStringParameters;
+    const db = await connectDatabase();
+    if (!db) {
+      throw new Error('DB Failed');
+    }
+
+    const selectQuery = `
+      SELECT *
+      FROM url
+      WHERE originUrl=$1;
+    `;
+    const isUrlExist = await db.query(selectQuery, [url]);
+
     let id;
-    if (!isExist) {
-      const newUrl = await Url.create({
-        originUrl: url,
-      });
+    if (!isUrlExist.rows.length) {
+      const insertQuery = `
+        INSERT INTO url (
+          originUrl
+        ) VALUES (
+          $1
+        );`;
 
-      id = newUrl.dataValues.id;
+      let result = await db.query(insertQuery, [url]);
+      result = await db.query(selectQuery, [url]);
+      id = result.rows[0].id;
     } else {
-      id = isExist.dataValues.id;
-    } */
+      id = isUrlExist.rows[0].id;
+    }
 
-    const shortUrlToBase62 = indexToBase62(2000);
+    const shortUrlToBase62 = indexToBase62(id);
 
     return {
       statusCode: StatusCodes.CREATED,
@@ -35,34 +66,35 @@ const shortUrlConverter = async (
       }),
     };
   } catch (error) {
-    console.error(error);
     return {
       statusCode: StatusCodes.BAD_REQUEST,
-      body: JSON.stringify({
-        message: 'Failed',
-        error,
-      }),
+      error,
     };
   }
 };
 
-type sample = Pick<APIGatewayProxyResult, 'statusCode' | 'headers'>;
-
 const redirectionToOrigin = async (
-  event: APIGatewayProxyEvent
-): Promise<sample | APIGatewayProxyResult> => {
+  event: ParamEvent
+): Promise<Response | APIGatewayProxyResult> => {
   try {
-    /* const { shortUrl } = req.params;
-    const id = base62ToIndex(shortUrl);
-    const url = await Url.findOne({
-      where: {
-        id,
-      },
-    });
-    if (!url) throw new customError(StatusCodes.BAD_REQUEST, 'DB가 없음');
-    */
+    const db = await connectDatabase();
+    if (!db) {
+      throw Error('DB Failed');
+    }
 
-    const originUrl = 'https://www.google.com';
+    const { shortUrl } = event.pathParameters;
+    const id = base62ToIndex(shortUrl);
+
+    const query = `
+      SELECT originUrl
+      FROM url
+      WHERE id = $1
+    `;
+    const result = await db.query(query, [id]);
+    if (!result) throw new Error('DB Not Found');
+
+    const originUrl = result.rows[0].originurl;
+    console.log(originUrl);
 
     return {
       statusCode: StatusCodes.MOVED_PERMANENTLY,

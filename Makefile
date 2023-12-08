@@ -11,6 +11,9 @@ deploy:
 clean:
 	rm -rf dist/
 
+log:
+	sls logs -f shortUrlConverter
+
 fclean:
 	clean
 	sls remove
