@@ -1,0 +1,12 @@
+org: mackerel
+app: shortyshorty
+service: lambda
+frameworkVersion: '3'
+
+provider:
+  name: aws
+  runtime: nodejs18.x
+
+functions:
+  sample:
+    handler: dist/handler.handler
