@@ -17,13 +17,11 @@
 ## Stacks
 
 ![TypeScript](https://img.shields.io/badge/TypeScript-%233178C6?style=flat&logo=TypeScript&logoColor=white)
-
-<!-- ![PostgreSQL](https://img.shields.io/badge/MySQL-4479A1?stype=flat&logo=MySQL&logoColor=white) -->
-<!-- ![Postman](https://img.shields.io/badge/Swagger-85EA2D?style=flat&logo=swagger&logoColor=white) -->
-<!-- serverless -->
-
-![AWS API Gateway](https://img.shields.io/badge/AWS_Lightsail-FF9900?style=flat&logo=awslightsail&logoColor=white)
-![AWS Lambda](https://img.shields.io/badge/AWS_Lightsail-FF9900?style=flat&logo=awslightsail&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?stype=flat&logo=postgresql&logoColor=white)
+![AWS API Gateway](https://img.shields.io/badge/Amazon_API_Gateway-FF4F8B?style=flat&logo=amazonapigateway&logoColor=white)
+![AWS Lambda](https://img.shields.io/badge/AWS_Lambda-FF9900?style=flat&logo=awslambda&logoColor=white)
+![Postman](https://img.shields.io/badge/Postman-FF6C37?style=flat&logo=postman&logoColor=white)
+![Serverless](https://img.shields.io/badge/Serverless-FD5750?style=flat&logo=serverless&logoColor=white)
 
 ## Set Up
 
