@@ -1,0 +1,55 @@
+openapi: 3.0.0
+info:
+  title: Shortyshorty
+  description: URL Shortener based on Base62
+  version: 1.0.0
+servers:
+  # - url: http://api.example.com/v1
+  #   description: Production
+  - url: http://localhost:8000
+    description: Local
+paths:
+  /api:
+    post:
+      tags:
+        - API
+      summary: Make short URL
+      description: Make short URL based on Base62
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                url:
+                  type: string
+
+      responses:
+        '200':
+          description: Convert success
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: 🔁 Convert Success!
+                  data:
+                    type: string
+                    example: https://shortyshorty.site/===Acz
+  /{shortUrl}:
+    get:
+      tags:
+        - API
+      summary: Redirection to Origin
+      parameters:
+        - name: shortUrl
+          in: path
+          schema:
+            type: string
+          required: true
+      responses:
+        '301':
+          description: Redirection success

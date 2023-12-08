@@ -1,9 +1,20 @@
 .PHONY: all up down
 
+# Alias
+DC=docker-compose
+DCFILE=docker-compose.dev.yaml
+
+# Command
 all: up
 
 up:
-	docker-compose -f docker-compose.dev.yaml up --build -d
+	$(DC) -f $(DCFILE) up --build -d
 
 down:
-	docker-compose -f docker-compose.dev.yaml down --rmi all
+	$(DC) -f $(DCFILE) down --rmi all
+
+ps:
+	$(DC) ps
+
+log-app:
+	$(DC) logs app --follow
