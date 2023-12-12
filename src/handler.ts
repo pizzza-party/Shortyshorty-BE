@@ -56,10 +56,15 @@ const shortUrlConverter = async (
       id = isUrlExist.rows[0].id;
     }
 
-    const shortUrlToBase62 = indexToBase62(id);
+    const shortUrlToBase62 = 'https://shortyshorty.site/' + indexToBase62(id);
 
     return {
       statusCode: StatusCodes.CREATED,
+      headers: {
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
+      },
       body: JSON.stringify({
         message: '🔁 Convert Success!',
         data: shortUrlToBase62,
