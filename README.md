@@ -9,6 +9,8 @@
 
 > URL Shortener based in base62
 
+![Main Page](https://github.com/pizzza-party/Shortyshorty-BE/assets/67633810/1046e368-af19-4fcf-bf80-e9b4186f98d5)
+
 <!-- ![Shortyshorty Home]() -->
 
 ## Architecture
