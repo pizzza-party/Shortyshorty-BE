@@ -18,32 +18,32 @@ const shortUrlConverter = async (
     } else {
       url = event.queryStringParameters.url;
     }
-    console.log(url, event.queryStringParameters);
     const validator = new OriginalUrlValidator();
     validator.originalUrl = url;
     const validationError: ValidationError[] = await validate(validator);
     if (validationError.length) {
-      throw new CustomError(StatusCodes.BAD_REQUEST, validationError);
+      throw new CustomError(
+        StatusCodes.BAD_REQUEST,
+        'Validation Error',
+        validationError
+      );
     }
 
     // Create DB
     const db = await connectDatabase();
-    if (!db) {
-      throw new CustomError(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        'DB Connection Failed'
-      );
-    }
 
-    const insertQuery = `
-      INSERT INTO url (origin_url)
-      VALUES ($1)
-      ON CONFLICT (origin_url)
-      DO UPDATE
-      SET
-        updated_at = NOW()
-      RETURNING id;`;
-    const result = await db.query(insertQuery, [url]);
+    // const insertQuery = ;
+    const result = await db.query(
+      `
+        INSERT INTO url (origin_url)
+        VALUES ($1)
+        ON CONFLICT (origin_url)
+        DO UPDATE
+        SET
+          updated_at = NOW()
+        RETURNING id;`,
+      [url]
+    );
     if (!result.rows.length) {
       throw new CustomError(
         StatusCodes.INTERNAL_SERVER_ERROR,
@@ -69,9 +69,7 @@ const shortUrlConverter = async (
     if (error instanceof CustomError) {
       return {
         statusCode: error.statusCode,
-        body: JSON.stringify({
-          message: error.message,
-        }),
+        body: error.body,
       };
     }
 
@@ -99,14 +97,15 @@ const redirectionToOrigin = async (
     validator.shortUrl = shortUrl;
     const validationError = await validate(validator);
     if (validationError.length) {
-      throw new CustomError(StatusCodes.BAD_REQUEST, validationError);
+      throw new CustomError(
+        StatusCodes.BAD_REQUEST,
+        'Validation Fail',
+        validationError
+      );
     }
 
     // Read DB
     const db = await connectDatabase();
-    if (!db) {
-      throw Error('DB Failed');
-    }
 
     const id = base62ToIndex(shortUrl!);
 
@@ -130,9 +129,7 @@ const redirectionToOrigin = async (
     if (error instanceof CustomError) {
       return {
         statusCode: error.statusCode,
-        body: JSON.stringify({
-          message: error.message,
-        }),
+        body: error.body,
       };
     }
 
@@ -168,7 +165,5 @@ const handler = async (event: Event): Promise<APIGatewayProxyResult> => {
 
   return response;
 };
-
-// handler({ httpMethod: 'POST', queryStringParameters: null, });
 
 export { handler };

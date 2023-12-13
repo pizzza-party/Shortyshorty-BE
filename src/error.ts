@@ -2,16 +2,14 @@ import { ValidationError } from 'class-validator';
 
 class CustomError {
   statusCode: number;
-  message?: string | ValidationError[];
-  error?: unknown;
+  body: string;
 
-  constructor(
-    statusCode: number,
-    message: string | ValidationError[],
-    error?: unknown
-  ) {
+  constructor(statusCode: number, message: string, stack?: unknown) {
     this.statusCode = statusCode;
-    this.message = message;
+    this.body = JSON.stringify({
+      message,
+      stack,
+    });
   }
 }
 
