@@ -14,15 +14,12 @@ package:
     - 'node_modules/**' # module 추가
 
 functions:
-  shortUrlConverter:
-    handler: dist/handler.shortUrlConverter
+  urlShortener:
+    handler: dist/handler.handler
     events:
       - http:
           path: /
           method: post
-  redirectionToOrigin:
-    handler: dist/handler.redirectionToOrigin
-    events:
       - http:
           path: /{shortUrl}
           method: get

@@ -1,12 +1,12 @@
 import { StatusCodes } from 'http-status-codes';
 import { indexToBase62, base62ToIndex } from './converter';
-import { QueryEvent, ParamEvent, Response } from './@types/event';
+import { Event, Response } from './@types/event';
 import { CustomError } from './error';
 import { connectDatabase } from './db';
 import { OriginalUrlValidator, ShortUrlValidator } from './validator';
 import { validate } from 'class-validator';
 
-const shortUrlConverter = async (event: QueryEvent): Promise<Response> => {
+const shortUrlConverter = async (event: Event) => {
   try {
     const { url } = event.queryStringParameters;
     const validator = new OriginalUrlValidator();
@@ -63,7 +63,7 @@ const shortUrlConverter = async (event: QueryEvent): Promise<Response> => {
   }
 };
 
-const redirectionToOrigin = async (event: ParamEvent): Promise<Response> => {
+const redirectionToOrigin = async (event: Event): Promise<Response> => {
   try {
     const { shortUrl } = event.pathParameters;
     const validator = new ShortUrlValidator();
@@ -104,4 +104,21 @@ const redirectionToOrigin = async (event: ParamEvent): Promise<Response> => {
   }
 };
 
-export { shortUrlConverter, redirectionToOrigin };
+const handler = async (event: Event): Promise<Response> => {
+  let response: Response;
+
+  if (event.httpMethod === 'POST') {
+    return await shortUrlConverter(event);
+  }
+
+  if (event.httpMethod === 'GET') {
+    return await redirectionToOrigin(event);
+  }
+
+  return {
+    statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+    message: 'Wrong HTTP Method',
+  };
+};
+
+export { handler };
