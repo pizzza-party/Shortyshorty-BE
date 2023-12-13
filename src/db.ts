@@ -2,7 +2,7 @@ import { Pool } from 'pg';
 import { StatusCodes } from 'http-status-codes';
 import { CustomError } from './error';
 
-const connectDatabase = async function (): Promise<Pool> {
+const connectDatabase = async (): Promise<Pool> => {
   try {
     const db = new Pool({
       host: process.env.DB_HOST,

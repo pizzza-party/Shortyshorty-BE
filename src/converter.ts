@@ -1,7 +1,7 @@
 const base62Char =
   'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
 
-const indexToBase62 = function (index: number) {
+const indexToBase62 = (index: number) => {
   let shortUrl = '';
 
   while (index > 0) {
@@ -16,7 +16,7 @@ const indexToBase62 = function (index: number) {
   return shortUrl;
 };
 
-const base62ToIndex = function (shortUrl: string) {
+const base62ToIndex = (shortUrl: string) => {
   let index = 0;
   let shortUrlIndex = shortUrl.length - 1;
 
