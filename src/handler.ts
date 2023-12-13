@@ -56,7 +56,10 @@ const shortUrlConverter = async (event: QueryEvent): Promise<Response> => {
     };
   } catch (error) {
     if (error instanceof CustomError) return error;
-    return { StatusCodes: StatusCodes.INTERNAL_SERVER_ERROR, error };
+    return {
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      error,
+    };
   }
 };
 
@@ -84,7 +87,6 @@ const redirectionToOrigin = async (event: ParamEvent): Promise<Response> => {
     const result = await db.query(query, [id]);
     if (!result.rows.length)
       throw new CustomError(StatusCodes.NOT_FOUND, 'Url Not Found');
-
     const originUrl = result.rows[0].origin_url;
 
     return {
@@ -92,13 +94,13 @@ const redirectionToOrigin = async (event: ParamEvent): Promise<Response> => {
       headers: {
         Location: originUrl,
       },
-      body: {
-        message: '🔁 Redirection Success!',
-      },
     };
   } catch (error) {
     if (error instanceof CustomError) return error;
-    return { StatusCodes: StatusCodes.INTERNAL_SERVER_ERROR, error };
+    return {
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      error,
+    };
   }
 };
 

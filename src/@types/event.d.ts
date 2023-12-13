@@ -13,6 +13,7 @@ interface ParamEvent extends APIGatewayProxyEvent {
   };
 }
 
-type Response = APIGatewayProxyResult | CustomError | unknown;
+type RedirectionResponse = Pick<APIGatewayProxyEvent, 'statusCode' | 'headers'>;
+type Response = APIGatewayProxyResult | RedirectionResponse | CustomError;
 
 export { QueryEvent, ParamEvent, Response };
