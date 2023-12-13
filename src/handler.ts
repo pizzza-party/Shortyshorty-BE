@@ -1,5 +1,5 @@
 import { StatusCodes } from 'http-status-codes';
-import { validate } from 'class-validator';
+import { ValidationError, validate } from 'class-validator';
 import { APIGatewayProxyResult } from 'aws-lambda';
 import { Event } from './@types/event';
 import { indexToBase62, base62ToIndex } from './converter';
@@ -12,12 +12,18 @@ const shortUrlConverter = async (
 ): Promise<APIGatewayProxyResult> => {
   try {
     // Validation
-    const { url } = event.queryStringParameters;
+    let url;
+    if (!event.queryStringParameters) {
+      url = undefined;
+    } else {
+      url = event.queryStringParameters.url;
+    }
+    console.log(url, event.queryStringParameters);
     const validator = new OriginalUrlValidator();
     validator.originalUrl = url;
-    const validationError = await validate(validator);
+    const validationError: ValidationError[] = await validate(validator);
     if (validationError.length) {
-      throw new CustomError(StatusCodes.BAD_REQUEST, 'Need HTTP Protocol.');
+      throw new CustomError(StatusCodes.BAD_REQUEST, validationError);
     }
 
     // Create DB
@@ -51,8 +57,8 @@ const shortUrlConverter = async (
       statusCode: StatusCodes.CREATED,
       headers: {
         'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'OPTIONS,POST,GET',
+        'Access-Control-Allow-Origin': 'https://www.shortyshorty.site',
+        'Access-Control-Allow-Methods': 'OPTIONS,POST',
       },
       body: JSON.stringify({
         message: '🔁 Convert Success!',
@@ -83,12 +89,17 @@ const redirectionToOrigin = async (
 ): Promise<APIGatewayProxyResult> => {
   try {
     // Validation
-    const { shortUrl } = event.pathParameters;
+    let shortUrl;
+    if (!event.pathParameters) {
+      shortUrl = undefined;
+    } else {
+      shortUrl = event.pathParameters.shortUrl;
+    }
     const validator = new ShortUrlValidator();
     validator.shortUrl = shortUrl;
     const validationError = await validate(validator);
     if (validationError.length) {
-      throw new CustomError(StatusCodes.BAD_REQUEST, 'Invalid shortUrl Type');
+      throw new CustomError(StatusCodes.BAD_REQUEST, validationError);
     }
 
     // Read DB
@@ -97,7 +108,7 @@ const redirectionToOrigin = async (
       throw Error('DB Failed');
     }
 
-    const id = base62ToIndex(shortUrl);
+    const id = base62ToIndex(shortUrl!);
 
     const query = `
       SELECT origin_url
@@ -142,8 +153,13 @@ const handler = async (event: Event): Promise<APIGatewayProxyResult> => {
   } else if (event.httpMethod === 'GET') {
     response = await redirectionToOrigin(event);
   } else {
-    return {
+    response = {
       statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      headers: {
+        'Access-Control-Allow-Headers': 'Content-Type',
+        'Access-Control-Allow-Origin': '*',
+        'Access-Control-Allow-Methods': 'OPTIONS,POST',
+      },
       body: JSON.stringify({
         message: 'Wrong HTTP Method',
       }),
@@ -152,5 +168,7 @@ const handler = async (event: Event): Promise<APIGatewayProxyResult> => {
 
   return response;
 };
+
+// handler({ httpMethod: 'POST', queryStringParameters: null, });
 
 export { handler };

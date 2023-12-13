@@ -1,10 +1,10 @@
 import { APIGatewayProxyEvent } from 'aws-lambda';
 
 interface Event extends APIGatewayProxyEvent {
-  queryStringParameters: {
+  queryStringParameters: null | {
     url: string;
   };
-  pathParameters: {
+  pathParameters: null | {
     shortUrl: string;
   };
 }

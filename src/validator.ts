@@ -1,4 +1,5 @@
 import {
+  IsNotEmpty,
   IsString,
   Length,
   registerDecorator,
@@ -23,16 +24,16 @@ function IsWithHttpProtocol(validationOptions?: ValidationOptions) {
 
 class OriginalUrlValidator {
   @IsString()
-  @IsWithHttpProtocol({
-    message: 'Need HTTP Protocol.',
-  })
-  originalUrl!: string;
+  @IsNotEmpty()
+  @IsWithHttpProtocol()
+  originalUrl: string | undefined;
 }
 
 class ShortUrlValidator {
   @IsString()
+  @IsNotEmpty()
   @Length(6, 6)
-  shortUrl!: string;
+  shortUrl!: string | undefined;
 }
 
 export { OriginalUrlValidator, ShortUrlValidator };
