@@ -15,13 +15,23 @@
 
 ## Architecture
 
-![Shortyshorty Architecture](https://github.com/pizzza-party/Shortyshorty-BE/assets/67633810/ad233363-dd88-4239-a2a1-12edd270b90e)
+![Shortyshorty Architecture](https://github.com/pizzza-party/Shortyshorty-BE/assets/67633810/11c4dee0-bfb7-4890-a3c7-cf41c216fa31)
 
 ## ERD
 
 ![Shortyshorty ERD](https://github.com/pizzza-party/Shortyshorty-BE/assets/67633810/3b2e819e-77de-4a57-b603-508fe2dd1245)
 
 ## Set Up
+
+### Environment variables
+
+```
+DB_HOST=
+DB_USER=
+DB_PASSWORD=
+DB_NAME=
+DB_PORT=
+```
 
 ### Installation
 

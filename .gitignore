@@ -7,5 +7,4 @@ jspm_packages
 
 dist
 
-.env.dev
 .DS_Store
