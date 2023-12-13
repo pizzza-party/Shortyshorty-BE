@@ -1,48 +1,36 @@
-import { APIGatewayProxyResult } from 'aws-lambda';
 import { StatusCodes } from 'http-status-codes';
 import { indexToBase62, base62ToIndex } from './converter';
-import { QueryEvent, ParamEvent, Response, Error } from './@types/event';
-import { Pool } from 'pg';
+import { QueryEvent, ParamEvent, Response } from './@types/event';
+import { CustomError } from './error';
+import { connectDatabase } from './db';
 
-// Database
-const connectDatabase = async function () {
-  try {
-    const db = new Pool({
-      host: process.env.DB_HOST,
-      user: process.env.DB_USER,
-      password: process.env.DB_PASSWORD,
-      database: process.env.DB_NAME,
-      port: Number(process.env.DB_PORT),
-    });
-
-    await db.connect();
-    return db;
-  } catch (error) {
-    console.error(error);
-  }
-};
-
-// APIs
-const shortUrlConverter = async (
-  event: QueryEvent
-): Promise<APIGatewayProxyResult | Error> => {
+const shortUrlConverter = async (event: QueryEvent): Promise<Response> => {
   try {
     const { url } = event.queryStringParameters;
     const db = await connectDatabase();
     if (!db) {
-      throw new Error('DB Failed');
+      throw new CustomError(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        'DB Connection Failed'
+      );
     }
 
     const insertQuery = `
-    INSERT INTO url (origin_url)
-    VALUES ($1)
-    ON CONFLICT (origin_url)
-    DO UPDATE
-    SET
-      updated_at = NOW()
-    RETURNING id;`;
+      INSERT INTO url (origin_url)
+      VALUES ($1)
+      ON CONFLICT (origin_url)
+      DO UPDATE
+      SET
+        updated_at = NOW()
+      RETURNING id;`;
 
     const result = await db.query(insertQuery, [url]);
+    if (!result.rows.length) {
+      throw new CustomError(
+        StatusCodes.INTERNAL_SERVER_ERROR,
+        'DB Insert Fail'
+      );
+    }
     const id = result.rows[0].id;
     const shortUrlToBase62 = indexToBase62(id);
 
@@ -59,16 +47,12 @@ const shortUrlConverter = async (
       }),
     };
   } catch (error) {
-    return {
-      statusCode: StatusCodes.BAD_REQUEST,
-      error,
-    };
+    if (error instanceof CustomError) return error;
+    return { StatusCodes: StatusCodes.INTERNAL_SERVER_ERROR, error };
   }
 };
 
-const redirectionToOrigin = async (
-  event: ParamEvent
-): Promise<Response | Error> => {
+const redirectionToOrigin = async (event: ParamEvent): Promise<Response> => {
   try {
     const db = await connectDatabase();
     if (!db) {
@@ -81,10 +65,10 @@ const redirectionToOrigin = async (
     const query = `
       SELECT origin_url
       FROM url
-      WHERE id = $1
-    `;
+      WHERE id = $1;`;
     const result = await db.query(query, [id]);
-    if (!result) throw new Error('DB Not Found');
+    if (!result.rows.length)
+      throw new CustomError(StatusCodes.NOT_FOUND, 'DB Not Found');
 
     const originUrl = result.rows[0].origin_url;
 
@@ -93,12 +77,13 @@ const redirectionToOrigin = async (
       headers: {
         Location: originUrl,
       },
+      body: {
+        message: '🔁 Redirection Success!',
+      },
     };
   } catch (error) {
-    return {
-      statusCode: StatusCodes.BAD_REQUEST,
-      error,
-    };
+    if (error instanceof CustomError) return error;
+    return { StatusCodes: StatusCodes.INTERNAL_SERVER_ERROR, error };
   }
 };
 
