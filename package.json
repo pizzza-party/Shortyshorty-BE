@@ -15,6 +15,7 @@
     "@types/pg": "^8.10.9"
   },
   "dependencies": {
+    "class-validator": "^0.14.0",
     "http-status-codes": "^2.3.0",
     "pg": "^8.11.3"
   }

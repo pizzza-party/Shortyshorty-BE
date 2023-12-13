@@ -3,10 +3,19 @@ import { indexToBase62, base62ToIndex } from './converter';
 import { QueryEvent, ParamEvent, Response } from './@types/event';
 import { CustomError } from './error';
 import { connectDatabase } from './db';
+import { OriginalUrlValidator, ShortUrlValidator } from './validator';
+import { validate } from 'class-validator';
 
 const shortUrlConverter = async (event: QueryEvent): Promise<Response> => {
   try {
     const { url } = event.queryStringParameters;
+    const validator = new OriginalUrlValidator();
+    validator.originalUrl = url;
+    const validationError = await validate(validator);
+    if (validationError.length) {
+      throw new CustomError(StatusCodes.BAD_REQUEST, 'Need HTTP Protocol.');
+    }
+
     const db = await connectDatabase();
     if (!db) {
       throw new CustomError(
@@ -23,7 +32,6 @@ const shortUrlConverter = async (event: QueryEvent): Promise<Response> => {
       SET
         updated_at = NOW()
       RETURNING id;`;
-
     const result = await db.query(insertQuery, [url]);
     if (!result.rows.length) {
       throw new CustomError(
@@ -54,12 +62,19 @@ const shortUrlConverter = async (event: QueryEvent): Promise<Response> => {
 
 const redirectionToOrigin = async (event: ParamEvent): Promise<Response> => {
   try {
+    const { shortUrl } = event.pathParameters;
+    const validator = new ShortUrlValidator();
+    validator.shortUrl = shortUrl;
+    const validationError = await validate(validator);
+    if (validationError.length) {
+      throw new CustomError(StatusCodes.BAD_REQUEST, 'Invalid shortUrl Type');
+    }
+
     const db = await connectDatabase();
     if (!db) {
       throw Error('DB Failed');
     }
 
-    const { shortUrl } = event.pathParameters;
     const id = base62ToIndex(shortUrl);
 
     const query = `
@@ -68,7 +83,7 @@ const redirectionToOrigin = async (event: ParamEvent): Promise<Response> => {
       WHERE id = $1;`;
     const result = await db.query(query, [id]);
     if (!result.rows.length)
-      throw new CustomError(StatusCodes.NOT_FOUND, 'DB Not Found');
+      throw new CustomError(StatusCodes.NOT_FOUND, 'Url Not Found');
 
     const originUrl = result.rows[0].origin_url;
 
