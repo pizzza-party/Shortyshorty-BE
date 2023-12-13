@@ -1,4 +1,5 @@
-import { ValidationError } from 'class-validator';
+import { APIGatewayProxyResult } from 'aws-lambda';
+import { StatusCodes } from 'http-status-codes';
 
 class CustomError {
   statusCode: number;
@@ -13,4 +14,24 @@ class CustomError {
   }
 }
 
-export { CustomError };
+const errorHandler = async (
+  error: CustomError | unknown
+): Promise<APIGatewayProxyResult> => {
+  let statusCode;
+  let body;
+
+  if (error instanceof CustomError) {
+    statusCode = error.statusCode;
+    body = error.body;
+  } else {
+    statusCode = StatusCodes.INTERNAL_SERVER_ERROR;
+    body = JSON.stringify(error);
+  }
+
+  return {
+    statusCode,
+    body,
+  };
+};
+
+export { CustomError, errorHandler };

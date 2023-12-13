@@ -1,84 +1,46 @@
 import { StatusCodes } from 'http-status-codes';
-import { ValidationError, validate } from 'class-validator';
+import { validate } from 'class-validator';
 import { APIGatewayProxyResult } from 'aws-lambda';
 import { Event } from './@types/event';
 import { indexToBase62, base62ToIndex } from './converter';
-import { CustomError } from './error';
+import { CustomError, errorHandler } from './error';
 import { connectDatabase } from './db';
-import { OriginalUrlValidator, ShortUrlValidator } from './validator';
+import { urlValidator, ShortUrlValidator } from './validator';
+
+const headers = {
+  'Access-Control-Allow-Headers': 'Content-Type',
+  'Access-Control-Allow-Origin': 'https://www.shortyshorty.site',
+  'Access-Control-Allow-Methods': 'OPTIONS,POST',
+};
 
 const shortUrlConverter = async (
   event: Event
 ): Promise<APIGatewayProxyResult> => {
   try {
-    // Validation
-    let url;
-    if (!event.queryStringParameters) {
-      url = undefined;
-    } else {
-      url = event.queryStringParameters.url;
-    }
-    const validator = new OriginalUrlValidator();
-    validator.originalUrl = url;
-    const validationError: ValidationError[] = await validate(validator);
-    if (validationError.length) {
-      throw new CustomError(
-        StatusCodes.BAD_REQUEST,
-        'Validation Error',
-        validationError
-      );
-    }
-
-    // Create DB
+    const url = await urlValidator(event.queryStringParameters);
     const db = await connectDatabase();
 
-    // const insertQuery = ;
-    const result = await db.query(
-      `
-        INSERT INTO url (origin_url)
-        VALUES ($1)
-        ON CONFLICT (origin_url)
-        DO UPDATE
-        SET
-          updated_at = NOW()
-        RETURNING id;`,
-      [url]
-    );
+    let result = await db.query(`SELECT id FROM url WHERE origin_url = $1;`, [
+      url,
+    ]);
     if (!result.rows.length) {
-      throw new CustomError(
-        StatusCodes.INTERNAL_SERVER_ERROR,
-        'DB Insert Fail'
-      );
+      result = await db.query(`INSERT INTO url (origin_url) VALUES ($1);`, [
+        url,
+      ]);
     }
     const id = result.rows[0].id;
     const shortUrlToBase62 = indexToBase62(id);
 
     return {
       statusCode: StatusCodes.CREATED,
-      headers: {
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Origin': 'https://www.shortyshorty.site',
-        'Access-Control-Allow-Methods': 'OPTIONS,POST',
-      },
+      headers,
       body: JSON.stringify({
         message: '🔁 Convert Success!',
         data: shortUrlToBase62,
       }),
     };
   } catch (error) {
-    if (error instanceof CustomError) {
-      return {
-        statusCode: error.statusCode,
-        body: error.body,
-      };
-    }
-
-    return {
-      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-      body: JSON.stringify({
-        error,
-      }),
-    };
+    return errorHandler(error);
   }
 };
 
@@ -126,19 +88,7 @@ const redirectionToOrigin = async (
       body: '',
     };
   } catch (error) {
-    if (error instanceof CustomError) {
-      return {
-        statusCode: error.statusCode,
-        body: error.body,
-      };
-    }
-
-    return {
-      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-      body: JSON.stringify({
-        error,
-      }),
-    };
+    return errorHandler(error);
   }
 };
 
@@ -152,11 +102,7 @@ const handler = async (event: Event): Promise<APIGatewayProxyResult> => {
   } else {
     response = {
       statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-      headers: {
-        'Access-Control-Allow-Headers': 'Content-Type',
-        'Access-Control-Allow-Origin': '*',
-        'Access-Control-Allow-Methods': 'OPTIONS,POST',
-      },
+      headers,
       body: JSON.stringify({
         message: 'Wrong HTTP Method',
       }),
