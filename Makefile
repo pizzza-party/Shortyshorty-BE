@@ -1,4 +1,4 @@
-.PHONY: all build deploy clean fclean re
+.PHONY: all build deploy clean re
 
 all: build deploy
 
@@ -10,12 +10,5 @@ deploy:
 
 clean:
 	rm -rf dist/
-
-log:
-	sls logs -f shortUrlConverter
-
-fclean:
-	clean
-	sls remove
 
 re: clean all
