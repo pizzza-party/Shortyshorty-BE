@@ -33,28 +33,17 @@ const shortUrlConverter = async (
       throw new Error('DB Failed');
     }
 
-    const selectQuery = `
-      SELECT *
-      FROM url
-      WHERE originUrl=$1;
-    `;
-    const isUrlExist = await db.query(selectQuery, [url]);
+    const insertQuery = `
+    INSERT INTO url (origin_url)
+    VALUES ($1)
+    ON CONFLICT (origin_url)
+    DO UPDATE
+    SET
+      updated_at = NOW()
+    RETURNING id;`;
 
-    let id;
-    if (!isUrlExist.rows.length) {
-      const insertQuery = `
-        INSERT INTO url (
-          originUrl
-        ) VALUES (
-          $1
-        ) RETURNING id;`;
-
-      let result = await db.query(insertQuery, [url]);
-      id = result.rows[0].id;
-    } else {
-      id = isUrlExist.rows[0].id;
-    }
-
+    const result = await db.query(insertQuery, [url]);
+    const id = result.rows[0].id;
     const shortUrlToBase62 = indexToBase62(id);
 
     return {
@@ -79,7 +68,7 @@ const shortUrlConverter = async (
 
 const redirectionToOrigin = async (
   event: ParamEvent
-): Promise<Response | APIGatewayProxyResult> => {
+): Promise<Response | Error> => {
   try {
     const db = await connectDatabase();
     if (!db) {
@@ -90,15 +79,14 @@ const redirectionToOrigin = async (
     const id = base62ToIndex(shortUrl);
 
     const query = `
-      SELECT originUrl
+      SELECT origin_url
       FROM url
       WHERE id = $1
     `;
     const result = await db.query(query, [id]);
     if (!result) throw new Error('DB Not Found');
 
-    const originUrl = result.rows[0].originurl;
-    console.log(originUrl);
+    const originUrl = result.rows[0].origin_url;
 
     return {
       statusCode: StatusCodes.MOVED_PERMANENTLY,
@@ -109,10 +97,7 @@ const redirectionToOrigin = async (
   } catch (error) {
     return {
       statusCode: StatusCodes.BAD_REQUEST,
-      body: JSON.stringify({
-        message: 'Failed',
-        error,
-      }),
+      error,
     };
   }
 };
