@@ -47,10 +47,9 @@ const shortUrlConverter = async (
           originUrl
         ) VALUES (
           $1
-        );`;
+        ) RETURNING id;`;
 
       let result = await db.query(insertQuery, [url]);
-      result = await db.query(selectQuery, [url]);
       id = result.rows[0].id;
     } else {
       id = isUrlExist.rows[0].id;
