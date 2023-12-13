@@ -1,13 +1,17 @@
 import { StatusCodes } from 'http-status-codes';
+import { validate } from 'class-validator';
+import { APIGatewayProxyResult } from 'aws-lambda';
+import { Event } from './@types/event';
 import { indexToBase62, base62ToIndex } from './converter';
-import { Event, Response } from './@types/event';
 import { CustomError } from './error';
 import { connectDatabase } from './db';
 import { OriginalUrlValidator, ShortUrlValidator } from './validator';
-import { validate } from 'class-validator';
 
-const shortUrlConverter = async (event: Event) => {
+const shortUrlConverter = async (
+  event: Event
+): Promise<APIGatewayProxyResult> => {
   try {
+    // Validation
     const { url } = event.queryStringParameters;
     const validator = new OriginalUrlValidator();
     validator.originalUrl = url;
@@ -16,6 +20,7 @@ const shortUrlConverter = async (event: Event) => {
       throw new CustomError(StatusCodes.BAD_REQUEST, 'Need HTTP Protocol.');
     }
 
+    // Create DB
     const db = await connectDatabase();
     if (!db) {
       throw new CustomError(
@@ -55,16 +60,29 @@ const shortUrlConverter = async (event: Event) => {
       }),
     };
   } catch (error) {
-    if (error instanceof CustomError) return error;
+    if (error instanceof CustomError) {
+      return {
+        statusCode: error.statusCode,
+        body: JSON.stringify({
+          message: error.message,
+        }),
+      };
+    }
+
     return {
       statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-      error,
+      body: JSON.stringify({
+        error,
+      }),
     };
   }
 };
 
-const redirectionToOrigin = async (event: Event): Promise<Response> => {
+const redirectionToOrigin = async (
+  event: Event
+): Promise<APIGatewayProxyResult> => {
   try {
+    // Validation
     const { shortUrl } = event.pathParameters;
     const validator = new ShortUrlValidator();
     validator.shortUrl = shortUrl;
@@ -73,6 +91,7 @@ const redirectionToOrigin = async (event: Event): Promise<Response> => {
       throw new CustomError(StatusCodes.BAD_REQUEST, 'Invalid shortUrl Type');
     }
 
+    // Read DB
     const db = await connectDatabase();
     if (!db) {
       throw Error('DB Failed');
@@ -92,33 +111,46 @@ const redirectionToOrigin = async (event: Event): Promise<Response> => {
     return {
       statusCode: StatusCodes.MOVED_PERMANENTLY,
       headers: {
-        Location: originUrl,
+        Location: originUrl, // Redirection Location
       },
+      body: '',
     };
   } catch (error) {
-    if (error instanceof CustomError) return error;
+    if (error instanceof CustomError) {
+      return {
+        statusCode: error.statusCode,
+        body: JSON.stringify({
+          message: error.message,
+        }),
+      };
+    }
+
     return {
       statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-      error,
+      body: JSON.stringify({
+        error,
+      }),
     };
   }
 };
 
-const handler = async (event: Event): Promise<Response> => {
-  let response: Response;
+const handler = async (event: Event): Promise<APIGatewayProxyResult> => {
+  let response: APIGatewayProxyResult;
 
   if (event.httpMethod === 'POST') {
-    return await shortUrlConverter(event);
+    response = await shortUrlConverter(event);
+  } else if (event.httpMethod === 'GET') {
+    response = await redirectionToOrigin(event);
+  } else {
+    return {
+      statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
+      body: JSON.stringify({
+        message: 'Wrong HTTP Method',
+      }),
+    };
   }
 
-  if (event.httpMethod === 'GET') {
-    return await redirectionToOrigin(event);
-  }
-
-  return {
-    statusCode: StatusCodes.INTERNAL_SERVER_ERROR,
-    message: 'Wrong HTTP Method',
-  };
+  return response;
 };
 
 export { handler };

@@ -1,5 +1,4 @@
-import { APIGatewayProxyEvent, APIGatewayProxyResult } from 'aws-lambda';
-import { CustomError } from '../error';
+import { APIGatewayProxyEvent } from 'aws-lambda';
 
 interface Event extends APIGatewayProxyEvent {
   queryStringParameters: {
@@ -10,7 +9,4 @@ interface Event extends APIGatewayProxyEvent {
   };
 }
 
-type RedirectionResponse = Pick<APIGatewayProxyEvent, 'statusCode' | 'headers'>;
-type Response = APIGatewayProxyResult | RedirectionResponse | CustomError;
-
-export { Event, Response };
+export { Event };
