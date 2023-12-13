@@ -15,7 +15,7 @@
 
 ## Architecture
 
-![Shortyshorty Architecture](https://github.com/pizzza-party/Shortyshorty-BE/assets/67633810/11c4dee0-bfb7-4890-a3c7-cf41c216fa31)
+![Shortyshorty Architecture](https://github.com/pizzza-party/Shortyshorty-BE/assets/67633810/08f873f3-24a4-4d9d-9e73-5d73985b6710)
 
 ## ERD
 
