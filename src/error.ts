@@ -14,9 +14,7 @@ class CustomError {
   }
 }
 
-const errorHandler = async (
-  error: CustomError | unknown
-): Promise<APIGatewayProxyResult> => {
+const errorHandler = (error: CustomError | unknown): APIGatewayProxyResult => {
   let statusCode;
   let body;
 

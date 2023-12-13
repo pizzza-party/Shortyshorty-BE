@@ -7,10 +7,10 @@ import {
   validate,
 } from 'class-validator';
 import { StatusCodes } from 'http-status-codes';
-import { QueryParameter } from './@types/event';
+import { PathParameter, QueryParameter } from './@types/event';
 import { CustomError } from './error';
 
-const IsWithHttpProtocol = function (validationOptions?: ValidationOptions) {
+const IsWithHttpProtocol = (validationOptions?: ValidationOptions) => {
   return function (object: Object, propertyName: string) {
     registerDecorator({
       target: object.constructor,
@@ -33,14 +33,14 @@ class OriginalUrl {
   originalUrl: string | undefined;
 }
 
-class ShortUrlValidator {
+class ShortUrl {
   @IsString()
   @IsNotEmpty()
   @Length(6, 6)
   shortUrl!: string | undefined;
 }
 
-const urlValidator = async function (query: QueryParameter): Promise<string> {
+const urlValidator = async (query: QueryParameter): Promise<string> => {
   let url;
 
   if (!query) {
@@ -63,4 +63,27 @@ const urlValidator = async function (query: QueryParameter): Promise<string> {
   return url as string;
 };
 
-export { urlValidator, ShortUrlValidator };
+const shortUrlValidator = async (path: PathParameter): Promise<string> => {
+  let shortUrl;
+
+  if (!path) {
+    shortUrl = undefined;
+  } else {
+    shortUrl = path.shortUrl;
+  }
+
+  const validator = new ShortUrl();
+  validator.shortUrl = shortUrl;
+  const validationError = await validate(validator);
+  if (validationError.length) {
+    throw new CustomError(
+      StatusCodes.BAD_REQUEST,
+      'Validation Fail',
+      validationError
+    );
+  }
+
+  return shortUrl as string;
+};
+
+export { urlValidator, shortUrlValidator };
