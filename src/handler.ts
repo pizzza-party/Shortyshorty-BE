@@ -6,7 +6,7 @@ import { CustomError, errorHandler } from './error';
 import { connectDatabase } from './db';
 import { urlValidator, shortUrlValidator } from './validator';
 
-const headers = {
+const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type',
   'Access-Control-Allow-Origin': 'https://www.shortyshorty.site',
   'Access-Control-Allow-Methods': 'OPTIONS,POST',
@@ -33,7 +33,7 @@ const shortUrlConverter = async (
 
     return {
       statusCode: StatusCodes.CREATED,
-      headers,
+      headers: corsHeaders,
       body: JSON.stringify({
         message: '🔁 Convert Success!',
         data: shortUrlToBase62,
@@ -63,6 +63,7 @@ const redirectionToOrigin = async (
     return {
       statusCode: StatusCodes.MOVED_PERMANENTLY,
       headers: {
+        ...corsHeaders,
         Location: originUrl, // Redirection Location
       },
       body: '',

@@ -35,10 +35,11 @@ DB_PORT=
 
 ```bash
 $ git clone https://github.com/pizzza-party/Shortyshorty-BE.git
+$ npm install
 ```
 
 ### Deploy
 
 ```bash
-make
+$ make
 ```
