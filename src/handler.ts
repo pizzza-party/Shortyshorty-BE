@@ -8,8 +8,8 @@ import { urlValidator, shortUrlValidator } from './validator';
 
 const corsHeaders = {
   'Access-Control-Allow-Headers': 'Content-Type',
-  'Access-Control-Allow-Origin': 'https://www.shortyshorty.site',
-  'Access-Control-Allow-Methods': 'OPTIONS,POST',
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Methods': 'POST,GET',
 };
 
 const shortUrlConverter = async (
@@ -61,12 +61,11 @@ const redirectionToOrigin = async (
     const originUrl = result.rows[0].origin_url;
 
     return {
-      statusCode: StatusCodes.MOVED_PERMANENTLY,
+      statusCode: StatusCodes.OK,
       headers: {
         ...corsHeaders,
-        Location: originUrl, // Redirection Location
       },
-      body: '',
+      body: JSON.stringify({ data: originUrl }),
     };
   } catch (error) {
     return errorHandler(error);
