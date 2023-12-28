@@ -1,0 +1,9 @@
+# /
+.git/
+.gitignore
+.env.dev
+README.md
+node_modules/
+
+# ./src
+./src/Dockerfile

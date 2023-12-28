@@ -1,14 +1,9 @@
-.PHONY: all build deploy clean re
+.PHONY: all up down
 
-all: build deploy
+all: up
 
-build:
-	npm run build
+up:
+	docker-compose -f docker-compose.dev.yaml up --build -d
 
-deploy:
-	npm run deploy
-
-clean:
-	rm -rf dist/
-
-re: clean all
+down:
+	docker-compose -f docker-compose.dev.yaml down --rmi all
