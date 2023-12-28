@@ -1,47 +1,45 @@
 # Shortyshorty-BE
 
-> Base62를 기반으로 하는 URL Shortener
+![TypeScript](https://img.shields.io/badge/TypeScript-%233178C6?style=flat&logo=TypeScript&logoColor=white)
+![PostgreSQL](https://img.shields.io/badge/PostgreSQL-4169E1?stype=flat&logo=postgresql&logoColor=white)
+![AWS API Gateway](https://img.shields.io/badge/Amazon_API_Gateway-FF4F8B?style=flat&logo=amazonapigateway&logoColor=white)
+![AWS Lambda](https://img.shields.io/badge/AWS_Lambda-FF9900?style=flat&logo=awslambda&logoColor=white)
+![Serverless](https://img.shields.io/badge/Serverless-FD5750?style=flat&logo=serverless&logoColor=white)
+![Postman](https://img.shields.io/badge/Postman-FF6C37?style=flat&logo=postman&logoColor=white)
 
-<!-- ![Shortyshorty Home]() -->
+> URL Shortener based in base62
 
-<!-- ![After convert]() -->
+![Main Page](https://github.com/pizzza-party/Shortyshorty-BE/assets/67633810/1046e368-af19-4fcf-bf80-e9b4186f98d5)
 
-<!-- ## Architecture -->
+## Architecture
 
-<!-- ![Shortyshorty Architecture]() -->
+![Shortyshorty Architecture](https://github.com/pizzza-party/Shortyshorty-BE/assets/67633810/08f873f3-24a4-4d9d-9e73-5d73985b6710)
 
 ## ERD
 
-![Shortyshorty ERD](https://github.com/pizzza-party/Shortyshorty-BE/assets/67633810/0113b6e6-d24d-450a-8192-51d517b68c12)
-
-## Stacks
-
-![TypeScript](https://img.shields.io/badge/TypeScript-%233178C6?style=flat&logo=TypeScript&logoColor=white)
-![Express](https://img.shields.io/badge/Express-000000?style=flat&logo=Express&logoColor=white)
-![MySQL](https://img.shields.io/badge/MySQL-4479A1?stype=flat&logo=MySQL&logoColor=white)
-![Sequelize](https://img.shields.io/badge/Sequelize-52B0E7?style=flat&logo=Sequelize&logoColor=white)
-![Swagger](https://img.shields.io/badge/Swagger-85EA2D?style=flat&logo=swagger&logoColor=white)
-
-![Docker](https://img.shields.io/badge/24.0.7-Docker-2496ED?style=flat&logo=Docker&logoColor=white)
-![Docker Compose](https://img.shields.io/badge/2.21.0-Docker_Compose-2496ED?style=flat&logo=dockercompose&logoColor=white)
-![Nginx](https://img.shields.io/badge/Nginx-009639?style=flat&logo=Nginx&logoColor=white)
-![AWS Lightsail](https://img.shields.io/badge/AWS_Lightsail-FF9900?style=flat&logo=awslightsail&logoColor=white)
+![Shortyshorty ERD](https://github.com/pizzza-party/Shortyshorty-BE/assets/67633810/3b2e819e-77de-4a57-b603-508fe2dd1245)
 
 ## Set Up
+
+### Environment variables
+
+```
+DB_HOST=
+DB_USER=
+DB_PASSWORD=
+DB_NAME=
+DB_PORT=
+```
 
 ### Installation
 
 ```bash
 $ git clone https://github.com/pizzza-party/Shortyshorty-BE.git
+$ npm install
 ```
 
-### Quick Start
+### Deploy
 
 ```bash
-# 시작
-make
-
-# 종료
-make down
-
+$ make
 ```

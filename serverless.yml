@@ -1,0 +1,25 @@
+org: mackerel
+app: shortyshorty
+service: lambda
+frameworkVersion: '3'
+provider:
+  name: aws
+  stage: v1
+  region: us-east-1
+  runtime: nodejs18.x
+package:
+  patterns:
+    - '!**' # 전체 제외
+    - 'dist/**' # build된 파일만 추가
+    - 'node_modules/**' # module 추가
+
+functions:
+  urlShortener:
+    handler: dist/handler.handler
+    events:
+      - http:
+          path: /
+          method: post
+      - http:
+          path: /{shortUrl}
+          method: get
